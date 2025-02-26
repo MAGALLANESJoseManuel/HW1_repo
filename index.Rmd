@@ -1,0 +1,47 @@
+---
+title: "the solution"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+
+```{r}
+rm(list = ls())
+
+myMapOnGit_link='https://github.com/MAGALLANESJoseManuel/HW1_repo/raw/refs/heads/main/countriesCIA.gpkg'
+
+
+library(sf)
+
+countriesCIA=read_sf(myMapOnGit_link, layer='cia')
+worldBorders=read_sf(myMapOnGit_link, layer='border')
+
+```
+
+
+```{r}
+interestingCountries=countriesCIA[(countriesCIA$tobacco_code==0) & (countriesCIA$alcohol_code==0),]
+interestingCountries
+```
+
+
+```{r}
+library(ggplot2)
+
+base=ggplot(data = worldBorders)+geom_sf(fill='grey',color=NA) + theme_linedraw()
+maskToClip=as.vector(st_bbox(interestingCountries))
+
+base + geom_sf(data=interestingCountries,fill='yellow') + 
+  coord_sf(xlim = c(maskToClip[1],maskToClip[3]), 
+           ylim = c(maskToClip[2],maskToClip[4])) +
+    geom_sf_text(data=interestingCountries,
+                 aes(label=COUNTRY),
+                 color='blue',
+                 check_overlap = T,
+                 size=3,
+                 nudge_y = 0.15)
+
+```
+
